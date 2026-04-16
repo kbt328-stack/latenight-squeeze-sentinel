@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "paths": {
+      "@sentinel/shared/*": ["./packages/shared/src/*"],
+      "@sentinel/db/*": ["./packages/db/src/*"],
+      "@sentinel/scoring-engine/*": ["./packages/scoring-engine/src/*"],
+      "@sentinel/data-clients/*": ["./packages/data-clients/src/*"],
+      "@sentinel/wallet-graph/*": ["./packages/wallet-graph/src/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}

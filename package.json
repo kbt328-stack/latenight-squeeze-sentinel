@@ -1,0 +1,32 @@
+{
+  "name": "squeeze-sentinel",
+  "private": true,
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel dev:api dev:dashboard dev:landing",
+    "dev:api": "pnpm --filter @sentinel/api dev",
+    "dev:dashboard": "pnpm --filter @sentinel/dashboard dev",
+    "dev:landing": "pnpm --filter @sentinel/landing dev",
+    "dev:workers": "pnpm --filter @sentinel/workers dev",
+    "build": "pnpm -r build",
+    "build:api": "pnpm --filter @sentinel/api build",
+    "build:dashboard": "pnpm --filter @sentinel/dashboard build",
+    "build:landing": "pnpm --filter @sentinel/landing build",
+    "test": "pnpm -r test",
+    "test:scoring": "pnpm --filter @sentinel/scoring-engine test",
+    "test:backtest": "pnpm --filter @sentinel/workers test:backtest",
+    "db:migrate": "pnpm --filter @sentinel/db migrate",
+    "db:migrate:make": "pnpm --filter @sentinel/db migrate:make",
+    "db:seed": "pnpm --filter @sentinel/db seed",
+    "db:reset": "pnpm --filter @sentinel/db reset",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
