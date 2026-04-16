@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
+    "strict": true, "esModuleInterop": true, "skipLibCheck": true,
+    "paths": {
+      "@sentinel/shared": ["../packages/shared/src/index.ts"],
+      "@sentinel/shared/*": ["../packages/shared/src/*.ts"],
+      "@sentinel/data-clients": ["../packages/data-clients/src/index.ts"],
+      "@sentinel/scoring-engine": ["../packages/scoring-engine/src/index.ts"],
+      "@sentinel/scoring-engine/*": ["../packages/scoring-engine/src/*.ts"],
+      "@sentinel/db": ["../packages/db/src/index.ts"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}

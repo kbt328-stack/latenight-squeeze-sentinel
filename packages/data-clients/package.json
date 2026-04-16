@@ -1,5 +1,5 @@
 {
-  "name": "@sentinel/scoring-engine",
+  "name": "@sentinel/data-clients",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,6 +8,10 @@
     "./*": "./src/*.ts"
   },
   "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit" },
+  "dependencies": {
+    "@sentinel/shared": "workspace:*",
+    "ioredis": "^5.3.2"
+  },
   "devDependencies": {
     "typescript": "^5.4.0",
     "vitest": "^1.6.0",

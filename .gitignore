@@ -1,2 +1,4 @@
 .env
 node_modules/
+packages/db/node_modules
+packages/scoring-engine/node_modules

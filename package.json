@@ -27,6 +27,11 @@
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
+    "tsx": "^4.21.0",
     "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "bullmq": "^5.74.1",
+    "ioredis": "^5.10.1"
   }
 }
