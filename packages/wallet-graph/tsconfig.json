@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@sentinel/shared": ["../shared/src/index.ts"],
+      "@sentinel/shared/*": ["../shared/src/*.ts"],
+      "@sentinel/db": ["../db/src/index.ts"],
+      "@sentinel/db/*": ["../db/src/*.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
