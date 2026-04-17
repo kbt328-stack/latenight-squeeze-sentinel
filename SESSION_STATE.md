@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: Summary for the prompt: "Workstream G complete. Alerting worker boots, subscribes to Redis score:events, detects band escalations, deduplicates via 6h window, sends Telegram alerts. Fixed: db.execute returns array directly (not {rows:[]}), alerts.score_id made nullable, Telegram bot token and chat ID configured. RAVE test alert delivered successfully. Next: add alerting worker to workers dev script, commit G, then Workstream H real API hookup and I landing page."
+> Last session: Workstream G complete — alerting worker built, boots clean, subscribed to sentinel:scores Redis channel, wired into pnpm dev:workers. All 7 workers booting together. Fixed watchlist RAVE token ID (was empty string), coingecko_id snake_case key mismatch, replaced t3 stub with real fetchLongShortRatio call. Coinglass $80 plan blocks t3 (long/short) and q1/q2 (liquidations) — paywalled at v3. t4 OI data confirmed available. LUNARCRUSH_API_KEY needs verification in .env. Trigger plane still reading 0 — suspect BullMQ cron timing, needs monitoring next session. Next: verify trigger signals landing for RAVE, then H (dashboard) and I (landing page).
 
 ---
 
@@ -35,16 +35,16 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps | partial | Caddy not installed, CI/CD not tested end-to-end |
-| **B** | Database & Schema | d | Schema migrated, RAVE seeded, hypertables created |
-| **C** | Data Clients | d | All 6 clients present |
-| **D** | Scoring Engine | d | 108 tests passing, RAVE fixture scores ≥75 |
-| **E** | Ingestion Workers | d | All 5 workers boot clean |
-| **F** | Scoring Runner + Wallet Graph | ? | |
-| **G** | Alerting Worker | d | Blocked on F |
-| **H** | Dashboard SPA | x | Can start independently |
-| **I** | Landing Page | x | Can start independently |
-| **J** | Backtest Framework | x | Blocked on D+F |
+| **A** | Infrastructure & DevOps | Infrastructure & DevOps | Caddy not installed, CI/CD not tested end-to-end |
+| **B** | Database & Schema | Database & Schema | Schema migrated, RAVE seeded, hypertables created |
+| **C** | Data Clients | Data Clients | All 6 clients present |
+| **D** | Scoring Engine | Scoring Engine | 108 tests passing, RAVE fixture scores ≥75 |
+| **E** | Ingestion Workers | Ingestion Workers | All 5 workers boot clean |
+| **F** | Scoring Runner + Wallet Graph | Scoring Runner + Wallet Graph | |
+| **G** | Alerting Worker | Alerting Worker | Blocked on F |
+| **H** | Dashboard SPA | Dashboard SPA | Can start independently |
+| **I** | Landing Page | Landing Page | Can start independently |
+| **J** | Backtest Framework | Backtest Framework | Blocked on D+F |
 
 ## Database State
 - Migration 0001_initial.sql: ✅ Applied
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Next session: wire alerting into pnpm dev:workers, commit G, then H real API hookup + I landing page.
+Workstream G complete — alerting worker built, boots clean, subscribed to sentinel:scores Redis channel, wired into pnpm dev:workers. All 7 workers (alerting + 5 ingestion planes + scoring runner) booting together cleanly. Fixed watchlist RAVE token ID (was empty string), coingecko_id snake_case key mismatch, replaced t3 stub with real fetchLongShortRatio call. Coinglass $80 plan blocks t3 (long/short ratio) and q1/q2 (liquidations) — both require v3 API. t4 OI data confirmed available on v2. LUNARCRUSH_API_KEY needs verification in .env. Trigger plane still reading 0 at session end — BullMQ cron timing suspected, needs one full minute cycle to confirm. Next: verify trigger signals landing for RAVE with real data, then H (dashboard) and I (landing page).
 
 ## Milestone Tracking
 | Milestone | Target | Status |
