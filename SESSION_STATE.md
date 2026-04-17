@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: Session summary for end-session.sh:
+> Last session: Summary for the prompt: "Workstream E complete. All 5 ingestion workers (structural/setup/trigger/squeeze/distribution) typecheck clean and boot successfully. Fixed: named Redis import from ioredis, sql template literals replacing 2-arg db.execute, ANY(labels) pattern for array label filtering, boolean args to activate_s3/s4, single-arg activate_q5, sql re-exported from @sentinel/db. Next: Workstream F — scoring runner reads signals from DB, calls computeComposite(), writes score rows."
 
 ---
 
@@ -35,11 +35,11 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps |  | Caddy not installed, CI/CD not tested end-to-end |
-| **B** | Database & Schema | Workstream C verified — all 5 data clients exist (etherscan, coinglass, coingecko, lunarcrush, goplus) plus _lib/ (fetch, rate-limit, retry). packages/shared confirmed healthy, typechecks clean. Added test files for all 5 clients but mocks don't yet match actual signatures — clients use lazy key reads (throw at fetch time not constructor), GoPlus normalize takes 2 args (raw + contractAddress), GoPlus exported as default instance. 10/15 tests failing. Next session: read actual client method signatures, fix 4 failing test files, get all 15 green, then move to Workstream E ingestion workers. Also: add MILESTONES.md to repo root this session. | Schema migrated, RAVE seeded, hypertables created |
-| **C** | Data Clients |  | All 6 clients present |
+| **A** | Infrastructure & DevOps | done | Caddy not installed, CI/CD not tested end-to-end |
+| **B** | Database & Schema | done | Schema migrated, RAVE seeded, hypertables created |
+| **C** | Data Clients | done | All 6 clients present |
 | **D** | Scoring Engine | done | 108 tests passing, RAVE fixture scores ≥75 |
-| **E** | Ingestion Workers | x | All 5 workers boot clean |
+| **E** | Ingestion Workers | done | All 5 workers boot clean |
 | **F** | Scoring Runner + Wallet Graph | x | |
 | **G** | Alerting Worker | x | Blocked on F |
 | **H** | Dashboard SPA | x | Can start independently |
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Read SESSION_STATE.md and CLAUDE.md. We're continuing Workstream C — fix the 4 failing test files in packages/data-clients/src/__tests__/. The mocks don't match actual client signatures. Start by reading the actual source of each failing client before touching the tests. No keys in any output.
+Summary for the prompt: "Workstream E complete. All 5 ingestion workers (structural/setup/trigger/squeeze/distribution) typecheck clean and boot successfully. Fixed: named Redis import from ioredis, sql template literals replacing 2-arg db.execute, ANY(labels) pattern for array label filtering, boolean args to activate_s3/s4, single-arg activate_q5, sql re-exported from @sentinel/db. Next: Workstream F — scoring runner reads signals from DB, calls computeComposite(), writes score rows."
 
 ## Milestone Tracking
 | Milestone | Target | Status |
