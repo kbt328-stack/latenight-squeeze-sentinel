@@ -1,7 +1,7 @@
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis as IORedis } from 'ioredis';
 import { logger, SentinelError } from '@sentinel/shared';
-import { db, sql, scores } from '@sentinel/db';
+import { db, sql } from '@sentinel/db';
 import { computeComposite, type SignalValues } from '@sentinel/scoring-engine';
 import { getWatchlist, type WatchlistToken } from '../ingestion/_lib/watchlist.js';
 
@@ -92,13 +92,13 @@ async function scoreToken(token: WatchlistToken): Promise<void> {
       INSERT INTO scores (token_id, scored_at, composite, plane_scores, band, drawdown_probability, action, contributing_signals)
       VALUES (
         ${token.id}::uuid,
-        ${scoredAt},
+        ${scoredAt.toISOString()},
         ${result.composite},
         ${JSON.stringify(result.planes)}::jsonb,
         ${result.band},
         ${result.drawdownProbability},
         ${result.action},
-        ${result.contributingSignals}
+        ${JSON.stringify(result.contributingSignals).replace('[', '{').replace(']', '}')}
       )
       ON CONFLICT (token_id, scored_at) DO NOTHING
     `,

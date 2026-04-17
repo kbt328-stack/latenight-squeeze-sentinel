@@ -7,7 +7,7 @@ export async function writeSignals(signals: SignalRow[]): Promise<void> {
     for (const s of signals) {
       await db.execute(
         sql`INSERT INTO signals (token_id, plane, signal_id, value, raw_payload, source, observed_at)
-            VALUES (${s.tokenId}, ${s.plane}, ${s.signalId}, ${s.value}, ${JSON.stringify(s.rawPayload)}::jsonb, ${s.source}, ${s.observedAt})
+            VALUES (${s.tokenId}, ${s.plane}, ${s.signalId}, ${s.value}, ${JSON.stringify(s.rawPayload)}::jsonb, ${s.source}, ${s.observedAt.toISOString()})
             ON CONFLICT (token_id, signal_id, observed_at) DO NOTHING`
       );
     }
