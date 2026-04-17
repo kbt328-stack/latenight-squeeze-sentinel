@@ -4,13 +4,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": {
+      "import": "./src/index.ts"
+    }
   },
-  "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit" },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^5.4.0",
     "vitest": "^1.6.0",
     "@types/node": "^20.0.0"
-  }
+  },
+  "main": "./src/index.ts"
 }
