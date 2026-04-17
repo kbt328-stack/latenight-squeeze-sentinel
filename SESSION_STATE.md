@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: Workstream G complete — alerting worker built, boots clean, subscribed to sentinel:scores Redis channel, wired into pnpm dev:workers. All 7 workers booting together. Fixed watchlist RAVE token ID (was empty string), coingecko_id snake_case key mismatch, replaced t3 stub with real fetchLongShortRatio call. Coinglass $80 plan blocks t3 (long/short) and q1/q2 (liquidations) — paywalled at v3. t4 OI data confirmed available. LUNARCRUSH_API_KEY needs verification in .env. Trigger plane still reading 0 — suspect BullMQ cron timing, needs monitoring next session. Next: verify trigger signals landing for RAVE, then H (dashboard) and I (landing page).
+> Last session: Workstream G complete — alerting worker built, boots clean, subscribed to sentinel:scores Redis channel, wired into pnpm dev:workers. All 7 workers (alerting + 5 ingestion planes + scoring runner) booting together cleanly. Fixed watchlist RAVE token ID (was empty string), coingecko_id snake_case key mismatch, replaced t3 stub with real fetchLongShortRatio call. Coinglass $80 plan blocks t3 (long/short ratio) and q1/q2 (liquidations) — both require v3 API. t4 OI data confirmed available on v2. LUNARCRUSH_API_KEY needs verification in .env. Trigger plane still reading 0 at session end — BullMQ cron timing suspected, needs one full minute cycle to confirm. Next: verify trigger signals landing for RAVE with real data, then H (dashboard) and I (landing page).
 
 ---
 
