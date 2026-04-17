@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: For the session summary prompt it'll ask for, use:
+> Last session: Session 2026-04-17: pm2 installed, all 6 workers running persistently via ecosystem.config.cjs with dotenv env passthrough. Coinglass upgraded to Startup — /open_interest and /funding working (200), /globalLongShortAccountRatio still 500 (not on Startup tier). Composite non-zero at 2.61 — pipeline proven end-to-end. s5=87 confirmed structural worker firing correctly. Missing: t2/t4 values not inserting despite 200 responses (normalization or activation issue), s1-s4 not yet seen, long/short ratio needs Standard tier or stub. Next: debug why t2/t4 fetch 200 but write 0, fix globalLongShortAccountRatio to fail-fast instead of retrying, check s1-s4 structural signals. Always add the check list details because i dont know what to write.
 
 ---
 
@@ -35,10 +35,10 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps | Infrastructure & DevOps | Caddy not installed, CI/CD not tested end-to-end |
-| **B** | Database & Schema | Workstream F complete. Scoring runner writes score rows to DB and publishes to Redis pub/sub. Fixed: scoredAt and observedAt Date objects needed .toISOString() for postgres.js, contributing_signals array needed JSON.stringify+bracket replace. wallet-graph package scaffolded (accumulation-detector, cluster-linker, cross-token-query). Pipeline validated end-to-end: signals→scores table. Composite 0 currently (only t1/t5 stubs landing; structural runs hourly, Coinglass /globalLongShortAccountRatio 500ing persistently — likely tier limitation). Outstanding: Arkham client not built yet (key now available), Coinglass long/short ratio endpoint needs investigation, next session start F acceptance test with real structural signals. | Schema migrated, RAVE seeded, hypertables created |
-| **C** | Data Clients | Data Clients | All 6 clients present |
-| **D** | Scoring Engine | d | 108 tests passing, RAVE fixture scores ≥75 |
+| **A** | Infrastructure & DevOps | ?? | Caddy not installed, CI/CD not tested end-to-end |
+| **B** | Database & Schema | ? | Schema migrated, RAVE seeded, hypertables created |
+| **C** | Data Clients | ? | All 6 clients present |
+| **D** | Scoring Engine | ? | 108 tests passing, RAVE fixture scores ≥75 |
 | **E** | Ingestion Workers | ? | All 5 workers boot clean |
 | **F** | Scoring Runner + Wallet Graph | ? | |
 | **G** | Alerting Worker | ? | Blocked on F |
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Workstream F complete. Scoring runner writes score rows to DB and publishes to Redis pub/sub. Fixed: scoredAt and observedAt Date objects needed .toISOString() for postgres.js, contributing_signals array needed JSON.stringify+bracket replace. wallet-graph package scaffolded (accumulation-detector, cluster-linker, cross-token-query). Pipeline validated end-to-end: signals→scores table. Composite 0 currently (only t1/t5 stubs landing; structural runs hourly, Coinglass /globalLongShortAccountRatio 500ing persistently — likely tier limitation). Outstanding: Arkham client not built yet (key now available), Coinglass long/short ratio endpoint needs investigation, next session start F acceptance test with real structural signals.
+Session 2026-04-17: pm2 installed, all 6 workers running persistently via ecosystem.config.cjs with dotenv env passthrough. Coinglass upgraded to Startup — /open_interest and /funding working (200), /globalLongShortAccountRatio still 500 (not on Startup tier). Composite non-zero at 2.61 — pipeline proven end-to-end. s5=87 confirmed structural worker firing correctly. Missing: t2/t4 values not inserting despite 200 responses (normalization or activation issue), s1-s4 not yet seen, long/short ratio needs Standard tier or stub. Next: debug why t2/t4 fetch 200 but write 0, fix globalLongShortAccountRatio to fail-fast instead of retrying, check s1-s4 structural signals.
 
 ## Milestone Tracking
 | Milestone | Target | Status |
