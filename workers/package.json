@@ -4,21 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --import tsx/esm ingestion/structural.ts & node --import tsx/esm ingestion/setup.ts & node --import tsx/esm ingestion/trigger.ts & node --import tsx/esm ingestion/squeeze.ts & node --import tsx/esm ingestion/distribution.ts & node --import tsx/esm scoring/runner.ts",
+    "dev": "node --import tsx/esm alerting/index.ts & node --import tsx/esm ingestion/structural.ts & node --import tsx/esm ingestion/setup.ts & node --import tsx/esm ingestion/trigger.ts & node --import tsx/esm ingestion/squeeze.ts & node --import tsx/esm ingestion/distribution.ts & node --import tsx/esm scoring/runner.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentinel/shared": "workspace:*",
     "@sentinel/data-clients": "workspace:*",
-    "@sentinel/scoring-engine": "workspace:*",
     "@sentinel/db": "workspace:*",
+    "@sentinel/scoring-engine": "workspace:*",
+    "@sentinel/shared": "workspace:*",
+    "@sentinel/wallet-graph": "workspace:*",
     "bullmq": "^5.0.0",
+    "fastify": "^5.8.5",
     "ioredis": "^5.3.2",
-    "@sentinel/wallet-graph": "workspace:*"
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0",
     "tsx": "^4.0.0",
-    "@types/node": "^20.0.0"
+    "typescript": "^5.4.0"
   }
 }

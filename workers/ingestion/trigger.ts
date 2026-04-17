@@ -20,7 +20,7 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
   const { coinglass, etherscan, coingecko } = await import('@sentinel/data-clients');
   const eng = await import('@sentinel/scoring-engine');
   try {
-    const [fRaw, lsRaw, oiRaw] = await Promise.all([coinglass.fetchFundingRate(token.symbol), Promise.resolve({ data: [] } as any), coinglass.fetchOpenInterest(token.symbol)]);
+    const [fRaw, lsRaw, oiRaw] = await Promise.all([coinglass.fetchFundingRate(token.symbol), coinglass.fetchLongShortRatio(token.symbol), coinglass.fetchOpenInterest(token.symbol)]);
     const f = coinglass.normalizeFundingRate(fRaw), ls = coinglass.normalizeLongShortRatio(lsRaw), oi = coinglass.normalizeOpenInterest(oiRaw);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't2', value: eng.activate_t2(f.find((x:any)=>x.symbol===token.symbol)?.avgAnnualizedRate ?? 0), rawPayload: { avgAnnualizedRate: f.find((x:any)=>x.symbol===token.symbol)?.avgAnnualizedRate }, source: 'coinglass', observedAt: now });
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't3', value: eng.activate_t3(ls[0]?.shortToLongRatio ?? 0), rawPayload: { shortToLongRatio: ls[0]?.shortToLongRatio }, source: 'coinglass', observedAt: now });
