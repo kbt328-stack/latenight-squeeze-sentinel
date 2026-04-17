@@ -88,6 +88,22 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
+  packages/wallet-graph:
+    dependencies:
+      '@sentinel/db':
+        specifier: workspace:*
+        version: link:../db
+      '@sentinel/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.39
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   workers:
     dependencies:
       '@sentinel/data-clients':
@@ -102,6 +118,9 @@ importers:
       '@sentinel/shared':
         specifier: workspace:*
         version: link:../packages/shared
+      '@sentinel/wallet-graph':
+        specifier: workspace:*
+        version: link:../packages/wallet-graph
       bullmq:
         specifier: ^5.0.0
         version: 5.74.1
