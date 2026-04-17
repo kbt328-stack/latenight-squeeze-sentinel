@@ -1,0 +1,20 @@
+{
+  "name": "@sentinel/alerting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx/esm src/index.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sentinel/db": "workspace:*",
+    "@sentinel/shared": "workspace:*",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  }
+}
