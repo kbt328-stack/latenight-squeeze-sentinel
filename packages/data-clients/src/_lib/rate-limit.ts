@@ -1,6 +1,5 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { SentinelError, ErrorCodes } from '@sentinel/shared';
-
 let _redis: Redis | null = null;
 function getRedis(): Redis {
   if (!_redis) {
@@ -8,9 +7,7 @@ function getRedis(): Redis {
   }
   return _redis;
 }
-
 export interface RateLimiterOptions { key: string; maxRequests: number; windowSeconds: number; }
-
 export async function acquireToken(opts: RateLimiterOptions): Promise<void> {
   const redis = getRedis();
   const bucketKey = `rl:${opts.key}`;
