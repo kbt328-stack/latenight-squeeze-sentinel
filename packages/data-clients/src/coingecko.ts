@@ -1,7 +1,7 @@
 import { SentinelError, ErrorCodes } from '@sentinel/shared';
 import { instrumentedFetch } from './_lib/fetch.js';
 const SOURCE = 'coingecko';
-const BASE = 'https://pro-api.coingecko.com/api/v3';
+const BASE = 'https://api.coingecko.com/api/v3';
 const RL = { key: SOURCE, maxRequests: 25, windowSeconds: 60 };
 function key() { const k=process.env['COINGECKO_API_KEY']; if(!k) throw new SentinelError(ErrorCodes.MISSING_API_KEY,'COINGECKO_API_KEY not set'); return k; }
 
