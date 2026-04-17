@@ -19,20 +19,31 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
   const now = new Date(); const signals: SignalRow[] = [];
   const { coinglass, coingecko, etherscan, lunarcrush } = await import('@sentinel/data-clients');
   const eng = await import('@sentinel/scoring-engine');
+
+  // q1: liquidations — paywalled, degrade to 0
   try {
-    const [liqRaw, fRaw] = await Promise.all([coinglass.fetchLiquidations(token.symbol), coinglass.fetchFundingRate(token.symbol)]);
-    const liq = coinglass.normalizeLiquidations(liqRaw), f = coinglass.normalizeFundingRate(fRaw);
+    const liqRaw = await coinglass.fetchLiquidations(token.symbol);
+    const liq = coinglass.normalizeLiquidations(liqRaw);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q1', value: eng.activate_q1(liq[0]?.shortToLongRatio ?? 0), rawPayload: { shortToLongRatio: liq[0]?.shortToLongRatio }, source: 'coinglass', observedAt: now });
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q1'] }, 'q1 liquidations unavailable — stubbing 0'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q1', value: 0, rawPayload: { stub: true }, source: 'coinglass', observedAt: now }); }
+
+  // q2: funding rate — free tier, should succeed
+  try {
+    const fRaw = await coinglass.fetchFundingRate(token.symbol);
+    const f = coinglass.normalizeFundingRate(fRaw);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q2', value: eng.activate_q2(f[0]?.avgAnnualizedRate ?? 0), rawPayload: { avgAnnualizedRate: f[0]?.avgAnnualizedRate }, source: 'coinglass', observedAt: now });
-  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q1', 'q2'] }, 'Coinglass squeeze failed'); }
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q2'] }, 'q2 funding failed'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q2', value: 0, rawPayload: { stub: true }, source: 'coinglass', observedAt: now }); }
+
+  // q3: price change — coingecko free
   try {
     if (token.coingeckoId) { const cr = await coingecko.fetchCoin(token.coingeckoId); const c = coingecko.normalizeCoin(cr); signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q3', value: eng.activate_q3(c.pctChange24h), rawPayload: { pctChange24h: c.pctChange24h }, source: 'coingecko', observedAt: now }); }
-  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q3'] }, 'CoinGecko squeeze failed'); }
+    else { signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q3', value: 0, rawPayload: { stub: true }, source: 'coingecko', observedAt: now }); }
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q3'] }, 'q3 coingecko failed'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q3', value: 0, rawPayload: { stub: true }, source: 'coingecko', observedAt: now }); }
+
+  // q4: accumulator wallet withdrawals from exchanges
   try {
     const { db } = await import('@sentinel/db');
-    const accWallets = await db.execute(
-      sql`SELECT address FROM wallets WHERE 'early_accumulator' = ANY(labels) LIMIT 20`
-    ) as Array<{ address: string }>;
+    const accWallets = await db.execute(sql`SELECT address FROM wallets WHERE 'early_accumulator' = ANY(labels) LIMIT 20`) as Array<{ address: string }>;
     let withdrawals = 0; const cutoff = Math.floor((Date.now() - 3_600_000) / 1000);
     for (const w of accWallets.slice(0, 5)) {
       try {
@@ -43,13 +54,15 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
     }
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q4', value: eng.activate_q4(withdrawals), rawPayload: { withdrawals }, source: 'etherscan', observedAt: now });
   } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q4'] }, 'q4 failed'); }
+
+  // q5: social volume — lunarcrush, degrade if key missing
   try {
     const tsRaw = await lunarcrush.fetchTimeSeries(token.symbol.toLowerCase(), 7);
     const pts = lunarcrush.normalize(tsRaw), vel = lunarcrush.computeVelocity(pts);
-    // activate_q5 takes a single social volume score (0-100)
     const socialScore = vel.isVolumeATH ? 100 : Math.min(100, Math.max(0, vel.volumeChangePct24h));
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q5', value: eng.activate_q5(socialScore), rawPayload: { volumeChangePct24h: vel.volumeChangePct24h, isVolumeATH: vel.isVolumeATH }, source: 'lunarcrush', observedAt: now });
-  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q5'] }, 'LunarCrush squeeze failed'); }
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['q5'] }, 'q5 lunarcrush failed'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 'q5', value: 0, rawPayload: { stub: true }, source: 'lunarcrush', observedAt: now }); }
+
   if (signals.length > 0) await writeSignals(signals);
 }
 process.on('SIGTERM', async () => { await worker.close(); await queue.close(); await redis.quit(); process.exit(0); });

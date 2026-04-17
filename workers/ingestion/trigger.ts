@@ -19,16 +19,32 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
   const now = new Date(); const signals: SignalRow[] = [];
   const { coinglass, etherscan, coingecko } = await import('@sentinel/data-clients');
   const eng = await import('@sentinel/scoring-engine');
+
+  // t2: funding rate — free tier endpoint, should succeed
   try {
-    const [fRaw, lsRaw, oiRaw] = await Promise.all([coinglass.fetchFundingRate(token.symbol), coinglass.fetchLongShortRatio(token.symbol), coinglass.fetchOpenInterest(token.symbol)]);
-    const f = coinglass.normalizeFundingRate(fRaw), ls = coinglass.normalizeLongShortRatio(lsRaw), oi = coinglass.normalizeOpenInterest(oiRaw);
+    const fRaw = await coinglass.fetchFundingRate(token.symbol);
+    const f = coinglass.normalizeFundingRate(fRaw);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't2', value: eng.activate_t2(f.find((x:any)=>x.symbol===token.symbol)?.avgAnnualizedRate ?? 0), rawPayload: { avgAnnualizedRate: f.find((x:any)=>x.symbol===token.symbol)?.avgAnnualizedRate }, source: 'coinglass', observedAt: now });
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['t2'] }, 't2 funding failed'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 't2', value: 0, rawPayload: { stub: true }, source: 'coinglass', observedAt: now }); }
+
+  // t3: long/short ratio — paywalled on free tier, degrade to 0
+  try {
+    const lsRaw = await coinglass.fetchLongShortRatio(token.symbol);
+    const ls = coinglass.normalizeLongShortRatio(lsRaw);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't3', value: eng.activate_t3(ls[0]?.shortToLongRatio ?? 0), rawPayload: { shortToLongRatio: ls[0]?.shortToLongRatio }, source: 'coinglass', observedAt: now });
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['t3'] }, 't3 long/short unavailable — stubbing 0'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 't3', value: 0, rawPayload: { stub: true }, source: 'coinglass', observedAt: now }); }
+
+  // t4: open interest vs mcap — OI is free, mcap from coingecko
+  try {
+    const oiRaw = await coinglass.fetchOpenInterest(token.symbol);
+    const oi = coinglass.normalizeOpenInterest(oiRaw);
     let mcUsd = 0;
-    try { if (token.coingeckoId) { const cr = await coingecko.fetchCoin(token.coingeckoId); mcUsd = coingecko.normalizeCoin(cr).marketCapUsd; } } catch(mcErr:any) { logger.warn({ err: mcErr, coingeckoId: token.coingeckoId }, "mcap fetch failed"); }
+    try { if (token.coingeckoId) { const cr = await coingecko.fetchCoin(token.coingeckoId); mcUsd = coingecko.normalizeCoin(cr).marketCapUsd; } } catch(mcErr:any) { logger.warn({ err: mcErr, coingeckoId: token.coingeckoId }, 'mcap fetch failed'); }
     const oiUsd = oi[0]?.totalUsd ?? 0, oiToMc = mcUsd > 0 ? (oiUsd / mcUsd) * 100 : 0;
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't4', value: eng.activate_t4(oiToMc), rawPayload: { oiUsd, mcUsd, oiToMc }, source: 'coinglass', observedAt: now });
-  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['t2', 't3', 't4'] }, 'Coinglass trigger failed'); }
+  } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['t4'] }, 't4 OI failed'); signals.push({ tokenId: token.id, plane: PLANE, signalId: 't4', value: 0, rawPayload: { stub: true }, source: 'coinglass', observedAt: now }); }
+
+  // t1: accumulator wallet deposits to exchanges
   try {
     const { db } = await import('@sentinel/db');
     const accWallets = await db.execute(
@@ -44,6 +60,7 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
     }
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 't1', value: eng.activate_t1(deposits), rawPayload: { deposits }, source: 'etherscan', observedAt: now });
   } catch (err) { logger.warn({ err, symbol: token.symbol, signals: ['t1'] }, 't1 failed'); }
+
   signals.push({ tokenId: token.id, plane: PLANE, signalId: 't5', value: 0, rawPayload: { stub: true }, source: 'stub', observedAt: now });
   if (signals.length > 0) await writeSignals(signals);
 }

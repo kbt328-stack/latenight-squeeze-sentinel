@@ -2,7 +2,7 @@ import { SentinelError, ErrorCodes } from '@sentinel/shared';
 import { instrumentedFetch } from './_lib/fetch.js';
 const SOURCE = 'coingecko';
 const BASE = 'https://api.coingecko.com/api/v3';
-const RL = { key: SOURCE, maxRequests: 25, windowSeconds: 60 };
+const RL = { key: SOURCE, maxRequests: 15, windowSeconds: 60 };
 function key() { const k=process.env['COINGECKO_API_KEY']; if(!k) throw new SentinelError(ErrorCodes.MISSING_API_KEY,'COINGECKO_API_KEY not set'); return k; }
 
 export interface CoinGeckoMarketChartRaw { prices:[number,number][]; market_caps:[number,number][]; total_volumes:[number,number][] }
@@ -12,14 +12,14 @@ export interface CoinSummary { id:string;symbol:string;currentPriceUsd:number;ma
 
 export class CoinGeckoClient {
   readonly source = SOURCE;
-  async fetchCoin(coinId:string) { return instrumentedFetch<CoinGeckoCoinRaw>(`${BASE}/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`,{source:SOURCE,endpoint:`/coins/${coinId}`,rateLimit:RL,apiKey:null,headers:{'x-cg-pro-api-key':key()},costUnits:1}); }
+  async fetchCoin(coinId:string) { return instrumentedFetch<CoinGeckoCoinRaw>(`${BASE}/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`,{source:SOURCE,endpoint:`/coins/${coinId}`,rateLimit:RL,apiKey:null,headers:{'x-cg-demo-api-key':key()},costUnits:1}); }
   normalizeCoin(raw:CoinGeckoCoinRaw, priceHistory?:PriceCandle[]):CoinSummary {
     const md=raw.market_data;
     let gainFromLow90d:number|null=null;
     if(priceHistory&&priceHistory.length>0){const low=Math.min(...priceHistory.map(c=>c.price));if(low>0)gainFromLow90d=((md.current_price.usd-low)/low)*100;}
     return{id:raw.id,symbol:raw.symbol,currentPriceUsd:md.current_price.usd,marketCapUsd:md.market_cap.usd,volumeUsd24h:md.total_volume.usd,circulatingSupply:md.circulating_supply,totalSupply:md.total_supply,pctChange24h:md.price_change_percentage_24h,pctChange7d:md.price_change_percentage_7d,pctChange30d:md.price_change_percentage_30d,athUsd:md.ath.usd,athDate:new Date(md.ath_date.usd),gainFromLow90d};
   }
-  async fetchMarketChart(coinId:string, days:number) { return instrumentedFetch<CoinGeckoMarketChartRaw>(`${BASE}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=hourly`,{source:SOURCE,endpoint:`/coins/${coinId}/market_chart`,rateLimit:RL,apiKey:null,headers:{'x-cg-pro-api-key':key()},costUnits:1}); }
+  async fetchMarketChart(coinId:string, days:number) { return instrumentedFetch<CoinGeckoMarketChartRaw>(`${BASE}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}&interval=hourly`,{source:SOURCE,endpoint:`/coins/${coinId}/market_chart`,rateLimit:RL,apiKey:null,headers:{'x-cg-demo-api-key':key()},costUnits:1}); }
   normalizeMarketChart(raw:CoinGeckoMarketChartRaw):PriceCandle[] { return raw.prices.map(([ts,price],i)=>({timestamp:new Date(ts),price,volume:raw.total_volumes[i]?.[1]??0,marketCap:raw.market_caps[i]?.[1]??0})); }
   hasLowerHighs(candles:PriceCandle[], windowCount=3):boolean {
     if(candles.length<windowCount*4)return false;
