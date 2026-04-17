@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: Session 2026-04-17: pm2 installed, all 6 workers running persistently via ecosystem.config.cjs with dotenv env passthrough. Coinglass upgraded to Startup — /open_interest and /funding working (200), /globalLongShortAccountRatio still 500 (not on Startup tier). Composite non-zero at 2.61 — pipeline proven end-to-end. s5=87 confirmed structural worker firing correctly. Missing: t2/t4 values not inserting despite 200 responses (normalization or activation issue), s1-s4 not yet seen, long/short ratio needs Standard tier or stub. Next: debug why t2/t4 fetch 200 but write 0, fix globalLongShortAccountRatio to fail-fast instead of retrying, check s1-s4 structural signals. Always add the check list details because i dont know what to write.
+> Last session: For the summary use: "Fixed trigger worker: coingecko URL pro→demo (t4 mcUsd now populating), annualized funding rate in normalizeFundingRate (t2 now correct 0 — RAVE not on perps), stubbed t3 long/short (404 on Startup tier), filtered t2 by symbol not f[0]. s1/s2/s4 still 0 — need Etherscan Pro for tokenholderlist. Composite 6.58 (structural 32.9 only). Pipeline healthy, all 6 workers running."
 
 ---
 
@@ -35,12 +35,12 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps | ?? | Caddy not installed, CI/CD not tested end-to-end |
+| **A** | Infrastructure & DevOps | ? | Caddy not installed, CI/CD not tested end-to-end |
 | **B** | Database & Schema | ? | Schema migrated, RAVE seeded, hypertables created |
 | **C** | Data Clients | ? | All 6 clients present |
 | **D** | Scoring Engine | ? | 108 tests passing, RAVE fixture scores ≥75 |
 | **E** | Ingestion Workers | ? | All 5 workers boot clean |
-| **F** | Scoring Runner + Wallet Graph | ? | |
+| **F** | Scoring Runner + Wallet Graph | / | |
 | **G** | Alerting Worker | ? | Blocked on F |
 | **H** | Dashboard SPA | ? | Can start independently |
 | **I** | Landing Page | ? | Can start independently |
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Session 2026-04-17: pm2 installed, all 6 workers running persistently via ecosystem.config.cjs with dotenv env passthrough. Coinglass upgraded to Startup — /open_interest and /funding working (200), /globalLongShortAccountRatio still 500 (not on Startup tier). Composite non-zero at 2.61 — pipeline proven end-to-end. s5=87 confirmed structural worker firing correctly. Missing: t2/t4 values not inserting despite 200 responses (normalization or activation issue), s1-s4 not yet seen, long/short ratio needs Standard tier or stub. Next: debug why t2/t4 fetch 200 but write 0, fix globalLongShortAccountRatio to fail-fast instead of retrying, check s1-s4 structural signals.
+Here's the full state handoff:
 
 ## Milestone Tracking
 | Milestone | Target | Status |
