@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: For the summary use: "Fixed trigger worker: coingecko URL pro→demo (t4 mcUsd now populating), annualized funding rate in normalizeFundingRate (t2 now correct 0 — RAVE not on perps), stubbed t3 long/short (404 on Startup tier), filtered t2 by symbol not f[0]. s1/s2/s4 still 0 — need Etherscan Pro for tokenholderlist. Composite 6.58 (structural 32.9 only). Pipeline healthy, all 6 workers running."
+> Last session: 
 
 ---
 
@@ -35,16 +35,16 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps | ? | Caddy not installed, CI/CD not tested end-to-end |
-| **B** | Database & Schema | ? | Schema migrated, RAVE seeded, hypertables created |
-| **C** | Data Clients | ? | All 6 clients present |
-| **D** | Scoring Engine | ? | 108 tests passing, RAVE fixture scores ≥75 |
-| **E** | Ingestion Workers | ? | All 5 workers boot clean |
-| **F** | Scoring Runner + Wallet Graph | / | |
-| **G** | Alerting Worker | ? | Blocked on F |
-| **H** | Dashboard SPA | ? | Can start independently |
-| **I** | Landing Page | ? | Can start independently |
-| **J** | Backtest Framework | ? | Blocked on D+F |
+| **A** | Infrastructure & DevOps | Infrastructure & DevOps | Caddy not installed, CI/CD not tested end-to-end |
+| **B** | Database & Schema | Database & Schema | Schema migrated, RAVE seeded, hypertables created |
+| **C** | Data Clients | Data Clients | All 6 clients present |
+| **D** | Scoring Engine | Scoring Engine | 108 tests passing, RAVE fixture scores ≥75 |
+| **E** | Ingestion Workers | Ingestion Workers | All 5 workers boot clean |
+| **F** | Scoring Runner + Wallet Graph | Scoring Runner + Wallet Graph | |
+| **G** | Alerting Worker | Alerting Worker | Blocked on F |
+| **H** | Dashboard SPA | Dashboard SPA | Can start independently |
+| **I** | Landing Page | Landing Page | Can start independently |
+| **J** | Backtest Framework | Backtest Framework | Blocked on D+F |
 
 ## Database State
 - Migration 0001_initial.sql: ✅ Applied
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Here's the full state handoff:
+
 
 ## Milestone Tracking
 | Milestone | Target | Status |
