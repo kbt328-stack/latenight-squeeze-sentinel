@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
 > Last updated: 2026-04-17
-> Last session: Built and deployed single-page watchlist dashboard (infra/scripts/dashboard-server.ts) — Fastify + vanilla HTML/JS, no React, no build step. Seeded 19 new watchlist tokens (infra/scripts/seed-watchlist.ts) bringing total to 20. Dashboard live at http://187.124.88.22:4000 (Hetzner firewall rule added for TCP 4000). All 5 ingestion workers + scoring runner already picked up new tokens — score rows writing for all 20 tokens as of 20:12 UTC. RAVE scoring 8.7/low (correct post-dump). New tokens will have non-zero scores after next hourly structural worker cycle (~top of hour). Dashboard auto-refreshes every 60s, shows composite score, band, per-plane signal breakdown, score history sparkline.
+> Last session: Summary for the prompt: "Workstream G complete. Alerting worker boots, subscribes to Redis score:events, detects band escalations, deduplicates via 6h window, sends Telegram alerts. Fixed: db.execute returns array directly (not {rows:[]}), alerts.score_id made nullable, Telegram bot token and chat ID configured. RAVE test alert delivered successfully. Next: add alerting worker to workers dev script, commit G, then Workstream H real API hookup and I landing page."
 
 ---
 
@@ -35,16 +35,16 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 ## Workstream Status
 | Stream | Name | Status | Notes |
 |---|---|---|---|
-| **A** | Infrastructure & DevOps | Paste any output or errors here if it fails.Sonnet 4.6partial | Caddy not installed, CI/CD not tested end-to-end |
+| **A** | Infrastructure & DevOps | partial | Caddy not installed, CI/CD not tested end-to-end |
 | **B** | Database & Schema | d | Schema migrated, RAVE seeded, hypertables created |
 | **C** | Data Clients | d | All 6 clients present |
 | **D** | Scoring Engine | d | 108 tests passing, RAVE fixture scores ≥75 |
 | **E** | Ingestion Workers | d | All 5 workers boot clean |
-| **F** | Scoring Runner + Wallet Graph | d | |
-| **G** | Alerting Worker | n | Blocked on F |
-| **H** | Dashboard SPA | partial | Can start independently |
-| **I** | Landing Page | n | Can start independently |
-| **J** | Backtest Framework | n | Blocked on D+F |
+| **F** | Scoring Runner + Wallet Graph | ? | |
+| **G** | Alerting Worker | d | Blocked on F |
+| **H** | Dashboard SPA | x | Can start independently |
+| **I** | Landing Page | x | Can start independently |
+| **J** | Backtest Framework | x | Blocked on D+F |
 
 ## Database State
 - Migration 0001_initial.sql: ✅ Applied
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Scoring pipeline live (B-F done), dashboard at :4000 with 20 tokens seeding signals, RAVE 8.7 post-dump correct — next: Workstream G (alerting worker) then finish H (real API hookup), I (landing), J (backtest).
+Next session: wire alerting into pnpm dev:workers, commit G, then H real API hookup + I landing page.
 
 ## Milestone Tracking
 | Milestone | Target | Status |
