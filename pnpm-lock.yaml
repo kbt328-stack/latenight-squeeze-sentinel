@@ -11,6 +11,9 @@ importers:
       bullmq:
         specifier: ^5.74.1
         version: 5.74.1
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       ioredis:
         specifier: ^5.10.1
         version: 5.10.1
@@ -1041,6 +1044,10 @@ packages:
 
   difflib@0.2.4:
     resolution: {integrity: sha512-9YVwmMb0wQHQNr5J9m6BSj6fk4pfGITGQOOs+D9Fl+INODWFOfvhIU1hNv6GgR1RBoC/9NJcwu77zShxV0kT7w==}
+
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
+    engines: {node: '>=12'}
 
   dreamopt@0.8.0:
     resolution: {integrity: sha512-vyJTp8+mC+G+5dfgsY+r3ckxlz+QMX40VjPQsZc5gxVAxLmi64TBoVkP54A/pRAXMXsbu2GMMBrZPxNv23waMg==}
@@ -2175,6 +2182,8 @@ snapshots:
   difflib@0.2.4:
     dependencies:
       heap: 0.2.7
+
+  dotenv@17.4.2: {}
 
   dreamopt@0.8.0:
     dependencies:

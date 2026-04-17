@@ -20,8 +20,9 @@ async function ingestToken(token: WatchlistToken): Promise<void> {
   const { etherscan, goplus, coinglass } = await import('@sentinel/data-clients');
   const eng = await import('@sentinel/scoring-engine');
   try {
-    const raw = await etherscan.fetchTokenHolders(token.contractAddress, token.chain as 'ethereum' | 'base');
-    const total = raw.result.reduce((s, h) => s + BigInt(h.TokenHolderQuantity), 0n);
+    const raw = await etherscan.fetchTokenHolders(token.contractAddress, token.chain as 'ethereum' | 'base', 1, 100);
+    const supplyRaw = await etherscan.fetchTotalSupply(token.contractAddress, token.chain as 'ethereum' | 'base');
+    const total = BigInt(supplyRaw.result);
     const c = etherscan.normalizeHolderConcentration(raw, total);
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 's1', value: eng.activate_s1(c.top3Pct), rawPayload: { top3Pct: c.top3Pct }, source: 'etherscan', observedAt: now });
     signals.push({ tokenId: token.id, plane: PLANE, signalId: 's2', value: eng.activate_s2(Math.max(0, 100 - c.top10Pct)), rawPayload: { estimatedFloatPct: 100 - c.top10Pct }, source: 'etherscan', observedAt: now });
