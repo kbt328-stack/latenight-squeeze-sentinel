@@ -1,7 +1,7 @@
 # Squeeze Sentinel — Session State
 > **Agents and humans: read this before touching anything. Update it before ending any session.**
-> Last updated: 2026-04-17
-> Last session: Summary: Fixed CoinGecko Demo key URL+header, Coinglass null guards, split paywalled endpoints to degrade gracefully, seeded real RAVE wallet addresses, built and deployed apps/api/ Fastify server with 4 routes returning live data. Composite now 15.38 with structural 52.15 and setup 33.
+> Last updated: 2026-04-18
+> Last session: Fixed Coinglass from dead v2 API to working v4, corrected all endpoint paths, implemented null vs 0 signal distinction so the model is honest about missing futures data, updated the scorer to skip nulls and redistribute weight, dropped the NOT NULL constraint on signals.value. All committed and pushed to main.
 
 ---
 
@@ -62,7 +62,7 @@ export $(cat .env | grep -v "^#" | grep -v "^$" | grep -v "ghp_" | xargs)
 6. Workers run via tsx (dev mode) — need Docker container for production
 
 ## Next Session Priority
-Squeeze Sentinel session start.
+For next session — dashboard (Workstream H). Before you start, log into docs.coinglass.com and find the long-short ratio endpoint path — that's the one remaining 404. 5 minutes of clicking will unblock t3 without another rabbit hole.
 
 ## Milestone Tracking
 | Milestone | Target | Status |
