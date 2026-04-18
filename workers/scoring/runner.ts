@@ -8,46 +8,27 @@ import { getWatchlist, type WatchlistToken } from '../ingestion/_lib/watchlist.j
 const QUEUE_NAME = 'scoring-runner';
 const SCORE_CHANNEL = 'sentinel:scores';
 
-const redis = new IORedis(process.env['REDIS_URL'] ?? 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
-
-const pubRedis = new IORedis(process.env['REDIS_URL'] ?? 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
-
+const redis = new IORedis(process.env['REDIS_URL'] ?? 'redis://localhost:6379', { maxRetriesPerRequest: null });
+const pubRedis = new IORedis(process.env['REDIS_URL'] ?? 'redis://localhost:6379', { maxRetriesPerRequest: null });
 const queue = new Queue(QUEUE_NAME, { connection: redis });
 
-// Run every minute
-await queue.upsertJobScheduler(
-  'scoring-cron',
-  { pattern: '* * * * *' },
-  { name: 'score-all', data: {} },
-);
+await queue.upsertJobScheduler('scoring-cron', { pattern: '* * * * *' }, { name: 'score-all', data: {} });
 
-const worker = new Worker<Record<string, never>>(
-  QUEUE_NAME,
-  async (_job: Job) => {
-    const tokens = await getWatchlist();
-    logger.info({ event: 'scoring_run_start', tokenCount: tokens.length }, 'Scoring run started');
-
-    for (const token of tokens) {
-      try {
-        await scoreToken(token);
-      } catch (err) {
-        logger.error({ err, symbol: token.symbol, event: 'scoring_token_error' }, 'Failed to score token');
-      }
-    }
-
-    logger.info({ event: 'scoring_run_complete' }, 'Scoring run complete');
-  },
-  { connection: redis, concurrency: 1 },
-);
+const worker = new Worker<Record<string, never>>(QUEUE_NAME, async (_job: Job) => {
+  const tokens = await getWatchlist();
+  logger.info({ event: 'scoring_run_start', tokenCount: tokens.length }, 'Scoring run started');
+  for (const token of tokens) {
+    try { await scoreToken(token); }
+    catch (err) { logger.error({ err, symbol: token.symbol, event: 'scoring_token_error' }, 'Failed to score token'); }
+  }
+  logger.info({ event: 'scoring_run_complete' }, 'Scoring run complete');
+}, { connection: redis, concurrency: 1 });
 
 async function scoreToken(token: WatchlistToken): Promise<void> {
   const scoredAt = new Date();
 
-  const rows = await db.execute<{ signal_id: string; value: number }>(
+  // value is now nullable — null means data unavailable, not a zero signal
+  const rows = await db.execute<{ signal_id: string; value: number | null }>(
     sql`
       SELECT DISTINCT ON (signal_id)
         signal_id,
@@ -60,32 +41,42 @@ async function scoreToken(token: WatchlistToken): Promise<void> {
   );
 
   if (rows.length === 0) {
-    logger.warn(
-      { symbol: token.symbol, event: 'scoring_no_signals' },
-      'No recent signals found — skipping score',
-    );
+    logger.warn({ symbol: token.symbol, event: 'scoring_no_signals' }, 'No recent signals — skipping');
     return;
   }
 
+  // Only feed non-null values into the scoring engine.
+  // Null = no futures market or API unavailable — weight redistributes automatically
+  // inside computeComposite across signals that ARE present.
   const signalValues: SignalValues = {};
+  const nullSignals: string[] = [];
+
   for (const row of rows) {
-    signalValues[row.signal_id as keyof SignalValues] = row.value;
+    if (row.value !== null) {
+      signalValues[row.signal_id as keyof SignalValues] = row.value;
+    } else {
+      nullSignals.push(row.signal_id);
+    }
+  }
+
+  const presentCount = Object.keys(signalValues).length;
+  if (presentCount === 0) {
+    logger.warn({ symbol: token.symbol, event: 'scoring_all_null' }, 'All signals null — skipping');
+    return;
   }
 
   const result = computeComposite(signalValues);
 
-  logger.info(
-    {
-      event: 'score_computed',
-      symbol: token.symbol,
-      tokenId: token.id,
-      composite: result.composite,
-      band: result.band,
-      planes: result.planes,
-      signalCount: rows.length,
-    },
-    `Score computed: ${result.composite} (${result.band})`,
-  );
+  logger.info({
+    event: 'score_computed',
+    symbol: token.symbol,
+    tokenId: token.id,
+    composite: result.composite,
+    band: result.band,
+    planes: result.planes,
+    signalCount: presentCount,
+    nullSignals,
+  }, `Score computed: ${result.composite} (${result.band}) — ${nullSignals.length} signals excluded (null)`);
 
   await db.execute(
     sql`
@@ -104,7 +95,7 @@ async function scoreToken(token: WatchlistToken): Promise<void> {
     `,
   );
 
-  const event = {
+  await pubRedis.publish(SCORE_CHANNEL, JSON.stringify({
     tokenId: token.id,
     symbol: token.symbol,
     composite: result.composite,
@@ -113,26 +104,11 @@ async function scoreToken(token: WatchlistToken): Promise<void> {
     action: result.action,
     planes: result.planes,
     contributingSignals: result.contributingSignals,
+    nullSignals,
     scoredAt: scoredAt.toISOString(),
-  };
-
-  await pubRedis.publish(SCORE_CHANNEL, JSON.stringify(event));
+  }));
 }
 
-process.on('SIGTERM', async () => {
-  await worker.close();
-  await queue.close();
-  await redis.quit();
-  await pubRedis.quit();
-  process.exit(0);
-});
-
-process.on('SIGINT', async () => {
-  await worker.close();
-  await queue.close();
-  await redis.quit();
-  await pubRedis.quit();
-  process.exit(0);
-});
-
+process.on('SIGTERM', async () => { await worker.close(); await queue.close(); await redis.quit(); await pubRedis.quit(); process.exit(0); });
+process.on('SIGINT',  async () => { await worker.close(); await queue.close(); await redis.quit(); await pubRedis.quit(); process.exit(0); });
 logger.info({ queue: QUEUE_NAME, channel: SCORE_CHANNEL }, 'Scoring runner started');
